@@ -5,12 +5,13 @@
 int playerHP = 20;
 int playerX, playerY;
 int width = 60, height = 30;
+int targetX = 0, targetY = 1;
 int ch;
 
 int randomRange(int min, int max);
 
-void drawPlayer();
-void drawMenu(int x, int height);
+void drawPlayer(int map[width][height]);
+void drawMenu(int x, int height, int[width][height]);
 void playerInput(int chr);
 
 int main(){
@@ -28,7 +29,7 @@ int main(){
             if(randomRange(0,100) > 5)
                 map[x][y] = 0;
             else
-                map[x][y] = 1;
+                map[x][y] = 110; // food plant
 
     map[width / 2][height / 2] = 0;
     playerX = width / 2;
@@ -42,13 +43,13 @@ int main(){
         //draw the map
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
-                if(map[x][y] == 1) // wall
-                    mvaddch(y, x, (char)178);
+                if(map[x][y] / 100 == 1) // food plant
+                    mvaddch(y, x, 'f');
             }
         }
         
-        drawPlayer();
-        drawMenu(width, height);
+        drawPlayer(map);
+        drawMenu(width, height, map);
 
         ch = getch();
         if(ch == 'q')
@@ -68,37 +69,63 @@ void playerInput(int chr){
     switch (chr)
     {
     case KEY_UP:
-        if(playerY > 0)
+        if(playerY > 0){
             playerY --;
+            targetY = -1;
+            targetX = 0;
+        }
         break;
     case KEY_DOWN:
-        if(playerY < height - 1)
+        if(playerY < height - 1){
             playerY++;
-            break;
+            targetY = 1;
+            targetX = 0;
+        }
+        break;
     case KEY_LEFT:
-        if(playerX > 0)
+        if(playerX > 0){
             playerX--;
-            break;
+            targetX = -1;
+            targetY = 0;
+        }
+        break;
     case KEY_RIGHT:
-        if(playerX < width - 1)
+        if(playerX < width - 1){
             playerX++;
-            break;
+            targetX = 1;
+            targetY = 0;
+        }
+        break;
     
     default:
         break;
     }
 }
 
-void drawPlayer(){
+void drawPlayer(int map[width][height]){
     mvaddch(playerY, playerX, '@');
+    if(map[playerX + targetX][playerY + targetY] == 110){
+        mvaddch(playerY + targetY, playerX + targetX, 'v');
+    }
+    else
+    {
+        mvaddch(playerY + targetY, playerX + targetX, 'O');
+    }
+    
 }
 
-void drawMenu(int x, int height){
+void drawMenu(int x, int height, int map[width][height]){
     for(int y = 0; y < height; y++){
         mvaddch(y, x, (char)186);
     }
 
     mvprintw(1, x + 3, "HP: %d", playerHP);
+    mvprintw(3, x + 3, "HEAL SEEDS: %d", 7);
+    mvprintw(4, x + 3, "BOMB SEEDS: %d", 13);
+
+    if(map[playerX + targetX][playerY + targetY] == 110){
+
+    }
 }
 
 int randomRange(int min, int max){
